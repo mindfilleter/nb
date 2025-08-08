@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Burger™ NERF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Permanent+Marker&display=swap');
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+        .marker {
+            font-family: 'Permanent Marker', cursive;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 1rem;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 4px solid #e53e3e;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .header h1 {
+            color: #e53e3e;
+        }
+        .section {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #4a4a4a;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fbbF24;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #4a4a4a;
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background-color: #e53e3e;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn:hover {
+            background-color: #c53030;
+        }
+        .btn-secondary {
+            background-color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #2d3748;
+        }
+        .stat-box {
+            background-color: #1a1a1a;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #4a4a4a;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .stat-box .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fbbF24;
+        }
+        .stat-box .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #a0aec0;
+        }
+        .input-field {
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 1px solid #4a4a4a;
+            color: #f0f0f0;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+        .skill-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #4a4a4a;
+        }
+        .skill-list li:last-child {
+            border-bottom: none;
+        }
+        .mastered {
+            color: #fbbF24;
+            font-weight: bold;
+        }
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #modal-content {
+            background-color: #2d2d2d;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        #modal-body {
+            margin-bottom: 1.5rem;
+            white-space: pre-wrap;
+            max-height: 60vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="marker text-5xl">N.E.R.F.</h1>
+            <p class="text-xl">Ninja Employment Reference Form</p>
+        </div>
+
+        <!-- Character Management -->
+        <div class="section">
+            <h2 class="section-title">Character Management</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="char-name" class="block mb-1">Character Name:</label>
+                    <input type="text" id="char-name" class="input-field" placeholder="Leave blank for random">
+                </div>
+                <div>
+                    <label for="char-select" class="block mb-1">Load Character:</label>
+                    <select id="char-select" class="input-field"></select>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+                <button id="new-char-btn" class="btn">New Character</button>
+                <button id="save-char-btn" class="btn">Save Current</button>
+                <button id="load-char-btn" class="btn btn-secondary">Load Selected</button>
+                <button id="delete-char-btn" class="btn btn-secondary">Delete Selected</button>
+            </div>
+        </div>
+
+        <!-- Core Info -->
+        <div class="section">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><strong>Clan:</strong> <span id="clan-display"></span></div>
+                <div class="md:col-span-2"><strong>Equipment:</strong> <span id="equipment-display"></span></div>
+             </div>
+        </div>
+        
+        <!-- Secondary Stats -->
+        <div class="section">
+            <h2 class="section-title">Secondary Stats</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat-box">
+                    <div class="value">
+                        <span id="hits-val">0</span>/<span id="max-hits-val">0</span>
+                    </div>
+                    <div class="label">HITS</div>
+                    <div class="mt-2 flex gap-1 justify-center">
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('hits', -1)">-</button>
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('hits', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div id="cd-val" class="value">0</div>
+                    <div class="label">Combat Dice</div>
+                </div>
+                <div class="stat-box">
+                    <div id="ki-val" class="value">0</div>
+                    <div class="label">Ki</div>
+                    <div class="mt-2 flex gap-1 justify-center">
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('ki', -1)">-</button>
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('ki', 1)">+</button>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div id="honor-val" class="value">10</div>
+                    <div class="label">Honor</div>
+                     <div class="mt-2 flex gap-1 justify-center">
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('honor', -1)">-</button>
+                        <button class="btn btn-secondary text-xs px-2 py-1" onclick="updateStat('honor', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hand Management -->
+        <div class="section">
+            <h2 class="section-title">Hand Management</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="left-hand" class="block mb-1">Left Hand:</label>
+                    <input type="text" id="left-hand" class="input-field" placeholder="Empty">
+                </div>
+                <div>
+                    <label for="right-hand" class="block mb-1">Right Hand:</label>
+                    <input type="text" id="right-hand" class="input-field" placeholder="Empty">
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="section">
+            <div class="section-title">
+                <span>Ninja Skills</span>
+                <div class="flex items-center gap-2 mt-2 md:mt-0">
+                    <label for="difficulty-dice" class="text-sm font-normal">Difficulty Dice:</label>
+                    <select id="difficulty-dice" class="input-field w-20 text-sm p-1">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">STRENGTH (<span id="strength-skill-val">0</span>)</h3>
+                    <ul id="strength-skills" class="skill-list"></ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">AGILITY (<span id="agility-skill-val">0</span>)</h3>
+                    <ul id="agility-skills" class="skill-list"></ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">KI (<span id="ki-skill-val">0</span>)</h3>
+                    <ul id="ki-skills" class="skill-list"></ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">EXTRANEOUS (<span id="extraneous-skill-val">0</span>)</h3>
+                    <ul id="extraneous-skills" class="skill-list"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="section">
+            <h2 class="section-title">Game Tables</h2>
+            <div class="flex flex-wrap gap-2">
+                <button class="btn" onclick="rollOnTable('pockets')">Ninja Pockets</button>
+                <button class="btn" onclick="rollOnTable('disgrace')">Unspeakable Disgrace</button>
+                <button class="btn" onclick="rollOnTable('disaster')">Delivery Bag Disaster</button>
+                <button class="btn" onclick="rollOnTable('egg')">Egg Grenade Type</button>
+                <button class="btn" onclick="rollOnTable('order')">Complete Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <h3 id="modal-title">Roll Result</h3>
+            <div id="modal-body"></div>
+            <div id="modal-footer">
+                <button class="btn" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- GAME DATA ---
+const GAME_DATA = {
+    skills: {
+        STRENGTH: { "TAI-JUTSU": "Unarmed", "KENPO-JUTSU": "Swords", "BO-JUTSU": "Staffs", "KUSARIGAMA-JUTSU": "Chains", "YARI-JUTSU": "Spears" },
+        AGILITY: { "BAJITSU": "Horsemanship", "SUIREN": "Swimming", "SHINOBI IRI": "Infiltration", "INTONJITSU": "Lying Low", "SHURIKEN-JUTSU": "Thrown" },
+        KI: { "KAYAKU-JUTSU": "Guns", "CHOHO": "Espionage", "HENSOJITSU": "Disguise", "SEISHIN TEKI KYOYO": "Meditation", "WUJENITSU": "Magic" },
+        EXTRANEOUS: { "BO RYAKU": "Strategies", "TENMON": "Meteorology", "CHIMON": "Geography", "KYOJITSU TENKAN HO": "Philosophy", "MAKUDONARUDO": "Fast Food" }
+    },
+    clans: [
+        { name: "Clan of the Thousand Islands", effect: (char) => { char.stats.AGILITY += 3; char.masteredSkills.push("SUIREN"); char.stats.KI -= 3; return "Gained +3 AGILITY, -3 KI, Mastered SUIREN."; } },
+        { name: "Brotherhood of the Blue Trees", effect: (char) => { const roll = rollDice(1); char.stats.KI += roll; char.stats.STRENGTH -= roll; return `Rolled ${roll}. Gained +${roll} KI, -${roll} STRENGTH.`; } },
+        { name: "Clan of the Hidden Ranch", effect: (char) => { char.masteredSkills.push("INTONJITSU"); return "Mastered INTONJITSU."; } },
+        { name: "Keepers of the Secret Sauce", effect: (char) => { char.stats.KI += 1; return "Gained +1 KI. Bonus die vs. Samurai Burger employees."; } },
+        { name: "House Gaijin", effect: (char) => { char.stats.STRENGTH += 3; char.stats.AGILITY -= 3; return "Gained +3 STRENGTH, -3 AGILITY."; } },
+        { name: "Lo Cal", effect: (char) => { const roll = rollDice(1); char.stats.EXTRANEOUS += roll; char.masteredSkills.push("HENSOJITSU"); return `Rolled ${roll}. Gained +${roll} EXTRANEOUS, Mastered HENSOJITSU.`; } }
+    ],
+    weapons: [
+        { name: "Ninja Hand", skill: "TAI-JUTSU", dam: 3, large: false }, { name: "1d6 Shuriken", skill: "SHURIKEN-JUTSU", dam: 2, large: false },
+        { name: "Nekode", skill: "TAI-JUTSU", dam: 4, large: false }, { name: "Kama", skill: "YARI-JUTSU", dam: 6, large: false },
+        { name: "Ninja Dagger", skill: "KENPO-JUTSU", dam: 4, large: false }, { name: "Spatula", skill: "BO-JUTSU", dam: 2, large: false },
+        { name: "Nunchaku", skill: "KUSARIGAMA-JUTSU", dam: 3, large: false }, { name: "Kusari-gama", skill: "KUSARIGAMA-JUTSU", dam: 5, large: false },
+        { name: "Ninja-to", skill: "KENPO-JUTSU", dam: 7, large: false }, { name: "Yari", skill: "YARI-JUTSU", dam: 7, large: true },
+        { name: "Shakujo-Yari", skill: "YARI-JUTSU", dam: 4, large: true }, { name: "Bo", skill: "BO-JUTSU", dam: 5, large: true }
+    ],
+    tables: {
+        pockets: { rows: 6, cols: 6, results: [ ["Snake Eyes!", "Bag of Caltrops", "Random Weapon", "Ninja Oil", "Headband", "NB™ Meal"], ["Random Weapon", "Eggshell Grenade", "Medicinal Herbs", "Lock Pick", "NB™ Meal", "1d6 Shuriken"], ["Lock Pick", "Ninja Oil", "Eggshell Grenade", "NB™ Meal", "Special", "Random Weapon"], ["1d6 Shuriken", "Special", "NB™ Meal", "Eggshell Grenade", "Medicinal Herbs", "Disguise Kit"], ["Headband", "NB™ Meal", "1d6 Shuriken", "Random Weapon", "Eggshell Grenade", "Special"], ["NB™ Meal", "Disguise Kit", "Special", "Bag of Caltrops", "1d6 Shuriken", "Eggshell Grenade"] ] },
+        disgrace: { dice: 2, results: { 2: "Nobody was Looking", 3: "Mistakenly Cast into Chinese Hell", 4: "Ninja Pride: 2d6 DAM", 5: "Never Speak of This: -tongue, 2 DAM", 6: "Beheaded: You die.", 7: "One for the Road: -1 honor", 8: "Self Abuse: 1d6 DAM", 9: "Seppuku", 10: "Serious Self Abuse: 2d6 DAM", 11: "Ancestral Anger: 3d6 DAM", 12: "Meteor Strike: 5d6 DAM" } },
+        disaster: { dice: 2, results: { 2: "Spilled the Fries", 3: "Cold Food: 2d6 DAM", 4: "Forgot the Wasabi: -1 honor", 5: "Greasy Napkins: Slip?", 6: "Ninja Burglar!", 7: "Dumped the Cola", 8: "Cut the Cheese: Attracts dog", 9: "Torn Bag", 10: "Switcheroo: Samurai Burger! -1 honor", 11: "Missing in Action", 12: "Smashed Food: Seppuku" } },
+        egg: { dice: 1, results: { 1: "Chicken", 2: "Dragon (Flash)", 3: "Peacock (Smoke)", 4: "Duck (Bang)", 5: "Rotten (Gas)", 6: "Snake (KO Powder)" } },
+        order: { dice: 1, results: { 1: "Samurai Chicken Sandwich", 2: "Fries of Our Ancestors", 3: "Onion Death Blossom", 4: "Another Ninja Burger™", 5: "Extra Wasabi", 6: "A Large Cola" } }
+    },
+    nameParts: {
+        japanese: ['ka', 'sa', 'ta', 'na', 'ha', 'ma', 'ya', 'ra', 'wa', 'ga', 'za', 'da', 'ba', 'pa', 'ki', 'shi', 'chi', 'ni', 'hi', 'mi', 'ri', 'gi', 'ji', 'bi', 'pi', 'ku', 'su', 'tsu', 'nu', 'fu', 'mu', 'yu', 'ru', 'gu', 'zu', 'bu', 'pu', 'ke', 'se', 'te', 'ne', 'he', 'me', 're', 'ge', 'ze', 'de', 'be', 'pe', 'ko', 'so', 'to', 'no', 'ho', 'mo', 'yo', 'ro', 'wo', 'go', 'zo', 'do', 'bo', 'po', 'n'],
+        chinese: ['li', 'wang', 'zhang', 'liu', 'chen', 'yang', 'huang', 'zhao', 'wu', 'zhou', 'xu', 'sun', 'ma', 'zhu', 'hu', 'guo', 'he', 'gao', 'lin', 'luo', 'zheng', 'liang', 'xie', 'song', 'tang', 'han', 'feng', 'yu', 'dong', 'xiao', 'cheng', 'cai', 'pan', 'yuan', 'deng', 'jiang', 'fan', 'su', 'wei', 'jing', 'lu'],
+        gaijin: {
+            male: { "John": "Jon", "Michael": "Maikeru", "David": "Debiddo", "Chris": "Kurisu", "James": "Jeimuzu", "Robert": "Robato", "Daniel": "Danieru" },
+            female: { "Mary": "Meari", "Jennifer": "Jenifa", "Lisa": "Risa", "Sarah": "Sera", "Jessica": "Jeshika", "Emily": "Emiri", "Ashley": "Asshuri" }
+        }
+    }
+};
+
+// --- CHARACTER STATE ---
+let character = {};
+const probabilityCache = {};
+
+// --- UTILITY FUNCTIONS ---
+const rollDice = (num) => {
+    let total = 0;
+    for (let i = 0; i < num; i++) {
+        total += Math.floor(Math.random() * 6) + 1;
+    }
+    return total;
+};
+
+function calculateSuccessProbability(diceCount, target) {
+    if (!target || target <= 0) return 0;
+    const sides = 6;
+    const cacheKey = `${diceCount}-${target}`;
+    if (probabilityCache[cacheKey]) {
+        return probabilityCache[cacheKey];
+    }
+
+    const dp = Array(diceCount + 1).fill(0).map(() => Array(diceCount * sides + 1).fill(0));
+    for (let i = 1; i <= sides; i++) {
+        dp[1][i] = 1;
+    }
+
+    for (let i = 2; i <= diceCount; i++) {
+        for (let j = i; j <= i * sides; j++) {
+            for (let k = 1; k <= sides && k < j; k++) {
+                dp[i][j] += dp[i-1][j-k];
+            }
+        }
+    }
+
+    let successfulOutcomes = 0;
+    for (let i = diceCount; i < target; i++) {
+        successfulOutcomes += dp[diceCount][i];
+    }
+
+    const totalOutcomes = Math.pow(sides, diceCount);
+    const probability = totalOutcomes > 0 ? (successfulOutcomes / totalOutcomes) * 100 : 0;
+    
+    probabilityCache[cacheKey] = probability;
+    return probability;
+}
+
+function getBlankCharacter() {
+    return {
+        name: '',
+        stats: { STRENGTH: 0, AGILITY: 0, KI: 0, EXTRANEOUS: 0 },
+        masteredSkills: [],
+        clan: { name: 'None' },
+        equipment: '',
+        honor: 10,
+        hits: 0,
+        maxHits: 0,
+        cd: 0,
+        ki: 0,
+        leftHand: '',
+        rightHand: ''
+    };
+}
+
+function generateRandomName(clanName) {
+    let name = '';
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    
+    if (clanName === 'Lo Cal') {
+        const parts = GAME_DATA.nameParts.chinese;
+        const len = Math.floor(Math.random() * 3) + 3; // 3 to 5 parts
+        for (let i = 0; i < len; i++) {
+            name += parts[Math.floor(Math.random() * parts.length)];
+        }
+        return capitalize(name);
+    } else if (clanName === 'House Gaijin') {
+        const isMale = Math.random() < 0.5;
+        const names = isMale ? GAME_DATA.nameParts.gaijin.male : GAME_DATA.nameParts.gaijin.female;
+        const westernNames = Object.keys(names);
+        const randomWesternName = westernNames[Math.floor(Math.random() * westernNames.length)];
+        return names[randomWesternName];
+    } else {
+        const parts = GAME_DATA.nameParts.japanese;
+        const len = Math.floor(Math.random() * 4) + 2; // 2 to 5 parts
+        for (let i = 0; i < len; i++) {
+            name += parts[Math.floor(Math.random() * parts.length)];
+        }
+        return capitalize(name);
+    }
+}
+
+
+// --- CHARACTER CREATION & CALCULATION ---
+function createNewCharacter() {
+    let name = document.getElementById('char-name').value.trim();
+    
+    // First, determine clan to generate name if needed
+    const clanRoll = rollDice(1) - 1;
+    const clan = GAME_DATA.clans[clanRoll];
+
+    if (!name) {
+        name = generateRandomName(clan.name);
+    }
+
+    let newChar = {
+        name: name,
+        stats: { STRENGTH: rollDice(3), AGILITY: rollDice(3), KI: rollDice(3), EXTRANEOUS: rollDice(3) },
+        masteredSkills: [],
+        clan: clan,
+        equipment: "Ninja Burger™ uniform, nametag, delivery bag (1d6 items)",
+        honor: 10,
+        leftHand: '',
+        rightHand: ''
+    };
+
+    Object.keys(GAME_DATA.skills).forEach(stat => {
+        const skillsInStat = Object.keys(GAME_DATA.skills[stat]);
+        let roll = rollDice(1);
+        let skillToMaster = skillsInStat[roll <= 5 ? roll - 1 : 0];
+        if (!newChar.masteredSkills.includes(skillToMaster)) {
+            newChar.masteredSkills.push(skillToMaster);
+        }
+    });
+
+    newChar.clan.effect(newChar);
+    
+    character = newChar;
+    promptForWeapon();
+}
+
+function promptForWeapon() {
+    const modalFooter = document.getElementById('modal-footer');
+    
+    let weaponOptions = GAME_DATA.weapons.map(w => `<option value="${w.name}">${w.name}</option>`).join('');
+    let modalBodyContent = `
+        <p>Choose your starting weapon, honorable Ninja!</p>
+        <select id="weapon-select-modal" class="input-field mt-4">${weaponOptions}</select>
+    `;
+
+    modalFooter.innerHTML = `<button class="btn" id="confirm-weapon-btn">Confirm Weapon</button>`;
+    
+    showModal("Select Weapon", modalBodyContent, true, true);
+
+    document.getElementById('confirm-weapon-btn').onclick = () => {
+        const selectedWeaponName = document.getElementById('weapon-select-modal').value;
+        const weaponData = GAME_DATA.weapons.find(w => w.name === selectedWeaponName);
+        
+        if (weaponData.large) {
+            character.leftHand = selectedWeaponName;
+            character.rightHand = selectedWeaponName;
+        } else {
+            character.rightHand = selectedWeaponName;
+        }
+        
+        calculateDerivedStats(character);
+        updateUI();
+        
+        const summary = `Name: ${character.name}\nClan: ${character.clan.name}\nWeapon: ${selectedWeaponName}`;
+        showModal("Character Created!", summary);
+    };
+}
+
+
+function calculateDerivedStats(char) {
+    char.hits = char.stats.STRENGTH;
+    char.maxHits = char.stats.STRENGTH;
+    char.ki = char.stats.KI;
+    const agi = char.stats.AGILITY;
+    if (agi <= 4) char.cd = 1; else if (agi <= 9) char.cd = 2; else if (agi <= 14) char.cd = 3; else if (agi <= 19) char.cd = 4; else if (agi <= 24) char.cd = 5; else char.cd = 6;
+    const ext = char.stats.EXTRANEOUS;
+    if (ext === 0) char.move = 1; else if (ext <= 4) char.move = 2; else if (ext <= 8) char.move = 3; else if (ext <= 12) char.move = 4; else if (ext <= 16) char.move = 5; else if (ext <= 20) char.move = 6; else char.move = 7;
+}
+
+// --- UI UPDATE FUNCTIONS ---
+function updateUI() {
+    if (!character || !character.stats) return;
+
+    document.getElementById('char-name').value = character.name || '';
+    
+    // Secondary Stats
+    document.getElementById('hits-val').textContent = character.hits;
+    document.getElementById('max-hits-val').textContent = character.maxHits;
+    document.getElementById('cd-val').textContent = character.cd || 0;
+    document.getElementById('ki-val').textContent = character.ki || 0;
+    document.getElementById('honor-val').textContent = character.honor;
+    
+    // Info
+    document.getElementById('clan-display').textContent = character.clan.name || 'None';
+    document.getElementById('equipment-display').textContent = character.equipment || 'None';
+
+    // Hands
+    document.getElementById('left-hand').value = character.leftHand || '';
+    document.getElementById('right-hand').value = character.rightHand || '';
+
+    // Skills
+    Object.keys(GAME_DATA.skills).forEach(stat => {
+        const statValue = character.stats[stat] || 0;
+        document.getElementById(`${stat.toLowerCase()}-skill-val`).textContent = statValue;
+        
+        const ul = document.getElementById(`${stat.toLowerCase()}-skills`);
+        ul.innerHTML = '';
+        const skillsInStat = GAME_DATA.skills[stat];
+        Object.keys(skillsInStat).forEach(skill => {
+            const isMastered = character.masteredSkills && character.masteredSkills.includes(skill);
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span class="flex-grow ${isMastered ? 'mastered' : ''}">
+                    ${skill} (${skillsInStat[skill]}) ${isMastered ? ' (M)' : ''}
+                </span>
+                <button class="btn btn-secondary text-xs px-2 py-1 w-28 text-center skill-check-btn" 
+                        data-skill="${skill}" data-stat="${stat}" 
+                        onclick="makeSkillCheck('${skill}', '${stat}')">
+                    Check
+                </button>
+            `;
+            ul.appendChild(li);
+        });
+    });
+    updateSuccessProbabilities();
+}
+
+function updateSuccessProbabilities() {
+    if (!character || !character.stats) return;
+
+    const difficulty = parseInt(document.getElementById('difficulty-dice').value);
+    const buttons = document.querySelectorAll('.skill-check-btn');
+
+    buttons.forEach(button => {
+        const stat = button.dataset.stat;
+        const skill = button.dataset.skill;
+        const targetStat = character.stats[stat];
+        
+        let effectiveDifficulty = difficulty;
+        if (character.masteredSkills && character.masteredSkills.includes(skill)) {
+            effectiveDifficulty = Math.max(1, difficulty - 1);
+        }
+        
+        const probability = calculateSuccessProbability(effectiveDifficulty, targetStat);
+        button.textContent = `Check (${probability.toFixed(0)}%)`;
+    });
+}
+
+// --- INTERACTIVE FUNCTIONS ---
+function makeSkillCheck(skill, stat) {
+    if (!character || !character.stats) return showModal("Error", "No character loaded.");
+    
+    const difficulty = parseInt(document.getElementById('difficulty-dice').value);
+    let effectiveDifficulty = difficulty;
+    if (character.masteredSkills.includes(skill)) {
+        effectiveDifficulty = Math.max(1, difficulty - 1);
+    }
+    
+    const roll = rollDice(effectiveDifficulty);
+    const targetStat = character.stats[stat];
+    const success = roll < targetStat;
+
+    let resultText = `Skill: ${skill} (${stat})\n`;
+    resultText += `Difficulty: ${difficulty} dice ${character.masteredSkills.includes(skill) ? '(-1 for Mastery)' : ''}\n`;
+    resultText += `Dice to Roll: ${effectiveDifficulty}d6\n`;
+    resultText += `Target: < ${targetStat}\n`;
+    resultText += `Roll: ${roll}\n\n`;
+    resultText += `Result: ${success ? 'SUCCESS!' : 'FAILURE!'}`;
+    showModal("Skill Check Result", resultText);
+}
+
+function updateStat(stat, amount) {
+    if (!character || !character.stats) return;
+    
+    if (stat === 'hits') {
+        character.hits = Math.max(0, Math.min(character.maxHits, character.hits + amount));
+    } else if (stat === 'ki') {
+        character.ki = Math.max(0, character.ki + amount);
+    } else if (stat === 'honor') {
+        character.honor += amount;
+        if (amount < 0) {
+            const checkRoll = rollDice(2);
+            const pass = checkRoll <= character.honor;
+            let dishonorText = `Lost 1 Honor. New total: ${character.honor}.\nDishonor Check (2d6 <= ${character.honor}): Rolled ${checkRoll}.\nResult: ${pass ? 'PASSED!' : 'FAILED! Roll on Unspeakable Disgrace Chart!'}`;
+            showModal("Dishonor!", dishonorText);
+        }
+    }
+    updateUI();
+}
+
+function rollOnTable(tableName) {
+    if (!character || !character.name) return showModal("Error", "No character loaded.");
+    const table = GAME_DATA.tables[tableName];
+    let title = "";
+    let result = "";
+
+    if (tableName === 'pockets') {
+        title = "Ninja Pockets";
+        const col = rollDice(1);
+        const row = rollDice(1);
+        let item = table.results[row - 1][col - 1];
+        if (item === "Random Weapon") {
+            item = GAME_DATA.weapons[rollDice(2) - 2].name;
+        }
+        result = `Column ${col}, Row ${row}:\n\nYou found: ${item}`;
+    } else {
+        const roll = rollDice(table.dice);
+        const tableResult = table.results[roll];
+        title = typeof tableResult === 'string' ? tableResult.split(':')[0] : "Table Roll";
+        result = `Rolled ${roll} on ${table.dice}d6:\n\n${tableResult}`;
+    }
+    showModal(title, result);
+}
+
+// --- LOCAL STORAGE & MANAGEMENT ---
+function getSavedChars() { return JSON.parse(localStorage.getItem('ninjaBurgerChars')) || {}; }
+function saveCharacter() {
+    if (!character || !character.name) return showModal("Error", "Cannot save a character without a name.");
+    
+    // Update hands from input fields before saving
+    character.leftHand = document.getElementById('left-hand').value;
+    character.rightHand = document.getElementById('right-hand').value;
+
+    const chars = getSavedChars();
+    chars[character.name] = character;
+    localStorage.setItem('ninjaBurgerChars', JSON.stringify(chars));
+    populateCharSelect();
+    showModal("Success", `Character "${character.name}" saved.`);
+}
+function loadCharacter() {
+    const charName = document.getElementById('char-select').value;
+    if (!charName) return;
+    const chars = getSavedChars();
+    if (chars[charName]) {
+        character = chars[charName];
+        updateUI();
+        showModal("Success", `Character "${charName}" loaded.`);
+    }
+}
+function deleteCharacter() {
+    const charName = document.getElementById('char-select').value;
+    if (!charName) return;
+    if (confirm(`Are you sure you want to delete ${charName}? This cannot be undone.`)) {
+        const chars = getSavedChars();
+        delete chars[charName];
+        localStorage.setItem('ninjaBurgerChars', JSON.stringify(chars));
+        populateCharSelect();
+        if (character.name === charName) {
+            character = getBlankCharacter();
+            updateUI();
+        }
+        showModal("Success", `Character "${charName}" deleted.`);
+    }
+}
+function populateCharSelect() {
+    const chars = getSavedChars();
+    const select = document.getElementById('char-select');
+    select.innerHTML = '<option value="">-- Select a Ninja --</option>';
+    for (const charName in chars) {
+        select.innerHTML += `<option value="${charName}">${charName}</option>`;
+    }
+}
+
+// --- MODAL ---
+function showModal(title, body, persistent = false, isHtml = false) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = isHtml ? body : body.replace(/\n/g, '<br>');
+    document.getElementById('modal-overlay').style.display = 'flex';
+    if (!persistent) {
+        document.getElementById('modal-footer').innerHTML = `<button class="btn" onclick="closeModal()">Close</button>`;
+    } else {
+        // For persistent modals, the footer is handled by the calling function
+    }
+}
+function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('new-char-btn').addEventListener('click', createNewCharacter);
+    document.getElementById('save-char-btn').addEventListener('click', saveCharacter);
+    document.getElementById('load-char-btn').addEventListener('click', loadCharacter);
+    document.getElementById('delete-char-btn').addEventListener('click', deleteCharacter);
+    document.getElementById('difficulty-dice').addEventListener('change', updateSuccessProbabilities);
+    
+    populateCharSelect();
+    character = getBlankCharacter();
+    updateUI();
+});
+
+</script>
+</body>
+</html>
